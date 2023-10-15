@@ -1,0 +1,38 @@
+name: Java App Build
+
+on: [push]  # Trigger the workflow on every push to the repository
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest version of Ubuntu as the runner
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2  # Check out the repository code
+
+    - name: Set up Java
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11'  # Choose the desired Java version
+
+    - name: Build with Maven
+      run: mvn clean install  # Build the Maven project
+
+    - name: Test
+      run: mvn test  # Run tests (optional)
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: jar
+        path: target/*.jar  # Replace with the actual path to your JAR file
+
+    - name: Deploy Artifacts
+      if: success()
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ runner.workspace }}/target/*.jar
+        asset_name: your-app.jar  # Replace with your desired asset name
+        asset_content_type: application/java-archive
+        asset_label: JAR file
